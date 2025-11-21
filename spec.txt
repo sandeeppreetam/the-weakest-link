@@ -1,0 +1,196 @@
+# The Weakest Link – Product Specification
+
+## 1. Overview
+
+The Weakest Link is a desktop, pass-and-play trivia game for groups. The app facilitates gameplay by displaying questions, tracking rounds, managing timers, handling life deductions after offline voting, and declaring a winner. All answering and voting happen offline. The app focuses solely on pacing, structure, and state management.
+
+This document summarizes scope, flows, UI expectations, and technical behaviors based on the latest wireframes.
+
+---
+
+## 2. Core Principles
+
+- Simple, fast gameplay suitable for a single shared device.
+- No scoring, correctness tracking, or online play.
+- Timer cues urgency but never auto-advances or affects gameplay outcomes.
+- Voting and answering are handled verbally by players; the app only updates state.
+
+---
+
+## 3. Gameplay Rules
+
+### Player Setup
+
+- Minimum players: 2.
+- Maximum players: fixed by implementation but assumed to be reasonable (e.g., 10 to 12).
+- Each player starts with 3 lives (default).
+
+### Rounds
+
+- Default rounds: 2.
+- Each round, every active player receives 3 questions.
+- Order of players answering is randomized each round.
+- Eliminated players (0 lives) do not participate in subsequent rounds.
+
+### Questions
+
+- Questions and answers are delivered from the backend.
+- Frontend does not parse CSV and does not validate question count.
+- If backend provides fewer questions than required, reuse is acceptable; the backend guarantees enough items to serve the session.
+
+### Voting
+
+- At the end of each round, players vote offline.
+- A single player must be selected before proceeding.
+- Timer is informational only and does not unblock progression.
+- Once a player is selected, their life count is reduced by one.
+- If a player reaches zero lives, they are eliminated.
+- If fewer than two players remain, the game ends and the last remaining player wins.
+
+---
+
+## 4. Default Settings
+
+- Rounds: 2
+- Questions per player per round: 3
+- Time per question: 10 seconds
+- Time for voting: 30 seconds
+- Starting lives: 3
+
+---
+
+## 5. User Flow (Aligned with Wireframes)
+
+### 1. Landing Screen
+
+- Shows title.
+- Primary CTA: "Start".
+- Secondary link: "How to play" (optional).
+
+### 2. Player Input Screen
+
+- Field: number of players.
+- Dynamic inputs for player names.
+- CTA: "Let's go".
+- All names must be non-empty.
+
+### 3. Round Start / Question View
+
+For each player in the randomized sequence:
+
+- Display: Round X/N.
+- Display: timer countdown (10 seconds).
+- Show question text.
+- User says answer offline.
+- Button: "Answer" transitions to reveal.
+
+### 4. Answer Reveal View
+
+- Same structure as question view.
+- Shows correct answer.
+- CTA: "Next".
+- Moves to next question or next player.
+
+### 5. End of Round View
+
+- Header: End of Round X/N.
+- Display: voting timer countdown.
+- List players with radio-style selection markers.
+- Lives displayed using icons.
+- User must select one player.
+
+### Voting Confirmation
+
+- On selecting a player, show confirmation prompt.
+- On confirm: reduce selected player's life by 1.
+
+### After Confirmation
+
+- Updated player list with new life totals.
+- CTA: "Start next round".
+- This CTA is enabled only when a player has been selected.
+
+### 6. Winner Screen
+
+- Large text: "Player X is the winner!".
+- CTA: "Play again".
+
+---
+
+## 6. UI Guidelines
+
+- Desktop-first design.
+- Clean, minimal UI.
+- Lives shown using heart icons.
+- Timers visible but non-blocking.
+- Round and question numbers clearly displayed.
+
+---
+
+## 7. State Management
+
+### Session State
+
+- Lives per player.
+- Current round.
+- Current player answering.
+- Current question index.
+- Eliminated players.
+
+### Persistence
+
+- Session persists until browser tab is closed or user restarts.
+- Safe to store in sessionStorage.
+
+---
+
+## 8. Game Engine Logic
+
+### Question Allocation
+
+- Backend provides required number of questions and answers.
+- If not enough, backend duplicates question entries as needed.
+- Frontend receives a complete set per session.
+
+### Player Order
+
+- Shuffle active players at the start of each round.
+
+### Lives and Elimination
+
+- Each confirmed vote deducts exactly one life.
+- Players with 0 lives are removed from the next round.
+- On elimination reducing count to one, game ends immediately.
+
+---
+
+## 9. Timers
+
+- Question timer: visual countdown only.
+- Voting timer: visual countdown only; does not advance flow.
+
+---
+
+## 10. Edge Cases
+
+- No name entered: block progression.
+- Duplicate names: allowed unless gameplay requires uniqueness.
+- If a user tries to proceed without selecting a player during voting: block and show reminder.
+- If fewer than 2 players at the start of any round: skip round and declare winner.
+
+---
+
+## 11. Success Criteria
+
+Gameplay should:
+
+- Be easy to operate with minimal instructions.
+- Match wireframes closely.
+- Never confuse players about whose turn it is.
+- Never auto-eliminate due to timer expiration.
+- Handle elimination and winner declaration cleanly.
+- Never block progression during voting unless no player is selected.
+
+---
+
+If you'd like, next I can: refine this into developer tickets, define API contracts for fetching questions, or produce a flows diagram.
