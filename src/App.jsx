@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Heart } from 'lucide-react';
+import { Heart, Loader2 } from 'lucide-react';
 
-// Sample questions - in production, this would come from backend
+// Sample questions - fallback if API fails
 const QUESTION_BANK = [
   { question: "What is the capital of India?", answer: "New Delhi" },
   { question: "What is the largest planet in our solar system?", answer: "Jupiter" },
@@ -36,6 +36,8 @@ const App = () => {
   const [screen, setScreen] = useState('landing');
   const [numPlayers, setNumPlayers] = useState(2);
   const [playerNames, setPlayerNames] = useState(['', '']);
+  const [persona, setPersona] = useState('');
+  const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(false);
   const [players, setPlayers] = useState([]);
   const [currentRound, setCurrentRound] = useState(1);
   const [playerOrder, setPlayerOrder] = useState([]);
@@ -80,12 +82,64 @@ const App = () => {
     setPlayerNames(newNames);
   };
 
-  const startGameplay = () => {
+  const proceedToPersona = () => {
     if (playerNames.some(name => !name.trim())) {
       alert('Please enter all player names');
       return;
     }
+    setScreen('persona');
+  };
 
+  const generateQuestionsWithGemini = async () => {
+    if (!persona.trim()) {
+      alert('Please describe your group persona');
+      return;
+    }
+
+    setIsGeneratingQuestions(true);
+
+    try {
+      // Calculate total questions needed
+      const totalQuestions = Math.pow(numPlayers, 2) * settings.startingLives * settings.questionsPerPlayer * 2;
+      
+      const response = await fetch('http://localhost:3001/api/generate-questions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          persona,
+          totalQuestions
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate questions');
+      }
+
+      const data = await response.json();
+      
+      if (!Array.isArray(data.questions) || data.questions.length === 0) {
+        throw new Error('Invalid question format received');
+      }
+
+      startGameplay(data.questions);
+    } catch (error) {
+      console.error('Error generating questions:', error);
+      alert('Failed to generate questions. Using default question bank instead.');
+      // Fallback to default questions
+      const fallbackQuestions = [];
+      const totalQuestions = Math.pow(numPlayers, 2) * settings.startingLives * settings.questionsPerPlayer * 2;
+      for (let i = 0; i < totalQuestions; i++) {
+        fallbackQuestions.push(QUESTION_BANK[i % QUESTION_BANK.length]);
+      }
+      startGameplay(fallbackQuestions);
+    } finally {
+      setIsGeneratingQuestions(false);
+    }
+  };
+
+  const startGameplay = (generatedQuestions) => {
     const initialPlayers = playerNames.map((name, index) => ({
       id: index,
       name: name.trim(),
@@ -93,15 +147,7 @@ const App = () => {
     }));
 
     setPlayers(initialPlayers);
-    
-    // Generate questions for the entire game (generous amount)
-    const totalQuestionsNeeded = initialPlayers.length * settings.questionsPerPlayer * 20; // 20 potential rounds
-    const gameQuestions = [];
-    for (let i = 0; i < totalQuestionsNeeded; i++) {
-      gameQuestions.push(QUESTION_BANK[i % QUESTION_BANK.length]);
-    }
-    setQuestions(gameQuestions);
-
+    setQuestions(generatedQuestions);
     startNewRound(initialPlayers, 1);
   };
 
@@ -114,7 +160,6 @@ const App = () => {
     }
 
     setCurrentRound(roundNumber || currentRound);
-    // Shuffle active players
     const shuffled = [...activePlayers].sort(() => Math.random() - 0.5);
     setPlayerOrder(shuffled);
     setCurrentPlayerIndex(0);
@@ -133,14 +178,12 @@ const App = () => {
     const nextQuestionIndex = currentQuestionIndex + 1;
     
     if (nextQuestionIndex < totalQuestionsThisRound) {
-      // Continue to next question - rotate through players
       const nextPlayerIndex = nextQuestionIndex % playerOrder.length;
       setCurrentPlayerIndex(nextPlayerIndex);
       setCurrentQuestionIndex(nextQuestionIndex);
       setShowingAnswer(false);
       setTimer(settings.questionTime);
     } else {
-      // End of round - go to voting
       setTimer(settings.votingTime);
       setSelectedPlayer(null);
       setShowConfirmation(false);
@@ -162,7 +205,6 @@ const App = () => {
     setPlayers(updatedPlayers);
     setShowConfirmation(false);
     
-    // Check if we have a winner immediately after voting
     const activePlayers = updatedPlayers.filter(p => p.lives > 0);
     if (activePlayers.length <= 1) {
       setScreen('winner');
@@ -190,6 +232,7 @@ const App = () => {
     setScreen('landing');
     setNumPlayers(2);
     setPlayerNames(['', '']);
+    setPersona('');
     setPlayers([]);
     setCurrentRound(1);
     setPlayerOrder([]);
@@ -372,10 +415,52 @@ const App = () => {
           </div>
 
           <button
-            onClick={startGameplay}
+            onClick={proceedToPersona}
             className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold py-3 px-8 rounded-lg text-lg transition-colors"
           >
-            Let's go
+            Next
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Persona Screen
+  if (screen === 'persona') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center p-8">
+        <div className="bg-white rounded-2xl shadow-xl p-12 max-w-2xl w-full">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">Customize Your Experience</h2>
+
+          <div className="mb-6">
+            <label className="block text-gray-700 mb-2 font-semibold">
+              Describe Your Group
+            </label>
+            <textarea
+              value={persona}
+              onChange={(e) => setPersona(e.target.value)}
+              placeholder="e.g., We are product managers who love sports, technology, and pop culture"
+              rows="4"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 resize-none"
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              This helps generate relevant questions for your group
+            </p>
+          </div>
+
+          <button
+            onClick={generateQuestionsWithGemini}
+            disabled={isGeneratingQuestions}
+            className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold py-3 px-8 rounded-lg text-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {isGeneratingQuestions ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Generating Questions...
+              </>
+            ) : (
+              "Let's go"
+            )}
           </button>
         </div>
       </div>
