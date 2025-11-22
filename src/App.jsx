@@ -501,17 +501,24 @@ const App = () => {
         <div className="bg-white rounded-3xl border-2 border-black shadow-lg p-12 max-w-md w-full animate-bounce-in">
           <h2 className="text-3xl font-bold text-black mb-8 text-center">Setup Game</h2>
           
-          <div className="mb-6">
-            <label className="block text-black mb-2 font-semibold">Number of players</label>
-            <input
-              type="number"
-              min="2"
-              max="12"
-              value={numPlayers}
-              onChange={(e) => handleNumPlayersChange(parseInt(e.target.value) || 2)}
-              className="w-full px-4 py-3 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-lg"
-            />
-          </div>
+    <div className="mb-6">
+      <label className="block text-black mb-2 font-semibold">
+        Number of players
+      </label>
+
+      <select
+        value={numPlayers}
+        onChange={(e) => handleNumPlayersChange(parseInt(e.target.value))}
+        className="w-full px-4 py-3 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-lg bg-white"
+      >
+        {Array.from({ length: 8 }, (_, i) => i + 2).map((n) => (
+          <option key={n} value={n}>
+            {n}
+          </option>
+        ))}
+      </select>
+    </div>
+
           
           <div className="mb-6">
             <label className="block text-black mb-2 font-semibold">Player Names</label>
