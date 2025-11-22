@@ -50,6 +50,7 @@ const App = () => {
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [showInstructions, setShowInstructions] = useState(false);
   const [settings, setSettings] = useState({
     questionsPerPlayer: DEFAULTS.questionsPerPlayer,
     questionTime: DEFAULTS.questionTime,
@@ -265,6 +266,14 @@ const App = () => {
     setShowSettings(false);
   };
 
+  const openInstructions = () => {
+    setShowInstructions(true);
+  };
+
+  const closeInstructions = () => {
+    setShowInstructions(false);
+  };
+
   const handleSettingChange = (key, value) => {
     setSettings(prev => ({
       ...prev,
@@ -327,21 +336,35 @@ const App = () => {
         `}</style>
         
         <div className="bg-white rounded-3xl border-2 border-black shadow-lg p-16 max-w-md w-full text-center animate-bounce-in">
-          <h1 className="text-5xl font-black text-black mb-12 tracking-tight">
+          <h1 className="text-5xl font-black text-black mb-8 tracking-tight">
             The Weakest Link
           </h1>
+
           <button
             onClick={startGame}
             className="bounce-button bg-black hover:bg-gray-800 text-white font-semibold py-3 px-8 rounded-full text-base mb-4 w-full"
           >
             Start Game
           </button>
-          <button
-            onClick={openSettings}
-            className="text-sm text-gray-600 hover:text-black underline cursor-pointer block w-full transition-colors"
-          >
-            Settings
-          </button>
+
+          <div className="flex gap-3 mb-4">
+            <button
+              onClick={openSettings}
+              className="flex-1 text-sm text-gray-600 hover:text-black underline cursor-pointer transition-colors"
+            >
+              Settings
+            </button>
+            <button
+              onClick={openInstructions}
+              className="flex-1 text-sm text-gray-600 hover:text-black underline cursor-pointer transition-colors"
+            >
+              Instructions
+            </button>
+          </div>
+
+          <p className="text-xs text-gray-600 mt-4">
+            Pass and play trivia for groups. Quick rounds, simple controls.
+          </p>
         </div>
 
         {/* Settings Modal */}
@@ -416,6 +439,46 @@ const App = () => {
                   className="flex-1 bounce-button bg-white hover:bg-gray-100 text-black font-semibold py-3 px-6 rounded-lg border-2 border-black"
                 >
                   Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Instructions Modal */}
+        {showInstructions && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-8 z-50">
+            <div className="bg-white rounded-3xl border-2 border-black shadow-2xl p-8 max-w-2xl w-full animate-bounce-in">
+              <h2 className="text-3xl font-bold text-black mb-4">How to play</h2>
+
+              <div className="space-y-3 text-sm text-black mb-6">
+                <p>1. Add 2 to 12 players, give them names.</p>
+                <p>2. Describe your group so question generation fits your interests. Or skip and use default questions.</p>
+                <p>3. Each round, every player answers a set number of questions.</p>
+                <p>4. At round end, everyone votes for who they think is the weakest link.</p>
+                <p>5. The voted player loses one life. Players with zero lives are out.</p>
+                <p>6. The game ends when one player remains. That player wins.</p>
+              </div>
+
+              <div className="space-y-3 text-xs text-gray-600 mb-6">
+                <p className="font-semibold">Notes</p>
+                <p>• Timers are a guide. Voting will not move on until someone is selected.</p>
+                <p>• If question generation fails, the app uses a fallback bank.</p>
+                <p>• You can change questions per player, timer lengths, and starting lives in settings.</p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={closeInstructions}
+                  className="flex-1 bounce-button bg-black hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg"
+                >
+                  Got it
+                </button>
+                <button
+                  onClick={() => { closeInstructions(); setShowSettings(true); }}
+                  className="flex-1 bounce-button bg-white hover:bg-gray-100 text-black font-semibold py-3 px-6 rounded-lg border-2 border-black"
+                >
+                  Settings
                 </button>
               </div>
             </div>
