@@ -26,10 +26,10 @@ const QUESTION_BANK = [
 ];
 
 const DEFAULTS = {
-  questionsPerPlayer: 3,
+  questionsPerPlayer: 2,
   questionTime: 10,
   votingTime: 30,
-  startingLives: 3
+  startingLives: 2
 };
 
 const App = () => {
@@ -43,6 +43,7 @@ const App = () => {
   const [playerOrder, setPlayerOrder] = useState([]);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [globalQuestionIndex, setGlobalQuestionIndex] = useState(0);
   const [questions, setQuestions] = useState([]);
   const [showingAnswer, setShowingAnswer] = useState(false);
   const [timer, setTimer] = useState(DEFAULTS.questionTime);
@@ -99,8 +100,11 @@ const App = () => {
     setIsGeneratingQuestions(true);
 
     try {
-      // Calculate total questions needed
-      const totalQuestions = Math.pow(numPlayers, 2) * settings.startingLives * settings.questionsPerPlayer * 2;
+      // Calculate total questions needed (capped at 500)
+      const totalQuestions = Math.min(
+        Math.pow(numPlayers, 2) * settings.startingLives * settings.questionsPerPlayer * 2,
+        500
+      );
       
       const response = await fetch('http://localhost:3001/api/generate-questions', {
         method: 'POST',
@@ -123,7 +127,10 @@ const App = () => {
         throw new Error('Invalid question format received');
       }
 
-      startGameplay(data.questions);
+      // Shuffle questions to randomize order
+      const shuffledQuestions = data.questions.sort(() => Math.random() - 0.5);
+
+      startGameplay(shuffledQuestions);
     } catch (error) {
       console.error('Error generating questions:', error);
       alert('Failed to generate questions. Using default question bank instead.');
@@ -148,6 +155,7 @@ const App = () => {
 
     setPlayers(initialPlayers);
     setQuestions(generatedQuestions);
+    setGlobalQuestionIndex(0);
     startNewRound(initialPlayers, 1);
   };
 
@@ -176,6 +184,9 @@ const App = () => {
   const handleNext = () => {
     const totalQuestionsThisRound = playerOrder.length * settings.questionsPerPlayer;
     const nextQuestionIndex = currentQuestionIndex + 1;
+    
+    // Always increment global question index
+    setGlobalQuestionIndex(globalQuestionIndex + 1);
     
     if (nextQuestionIndex < totalQuestionsThisRound) {
       const nextPlayerIndex = nextQuestionIndex % playerOrder.length;
@@ -238,6 +249,7 @@ const App = () => {
     setPlayerOrder([]);
     setCurrentPlayerIndex(0);
     setCurrentQuestionIndex(0);
+    setGlobalQuestionIndex(0);
     setQuestions([]);
     setShowingAnswer(false);
     setTimer(settings.questionTime);
@@ -277,7 +289,7 @@ const App = () => {
   };
 
   const getCurrentQuestion = () => {
-    return questions[currentQuestionIndex] || { question: '', answer: '' };
+    return questions[globalQuestionIndex] || { question: '', answer: '' };
   };
 
   // Landing Screen
@@ -442,6 +454,7 @@ const App = () => {
               placeholder="e.g., We are product managers who love sports, technology, and pop culture"
               rows="4"
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 resize-none"
+              disabled={isGeneratingQuestions}
             />
             <p className="text-xs text-gray-500 mt-1">
               This helps generate relevant questions for your group
@@ -462,6 +475,17 @@ const App = () => {
               "Let's go"
             )}
           </button>
+
+          {isGeneratingQuestions && (
+            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm text-blue-800 text-center mb-2 font-semibold">
+                🎯 Crafting your personalized trivia experience...
+              </p>
+              <p className="text-xs text-blue-600 text-center">
+                We're generating questions tailored to your interests. This usually takes 10-30 seconds.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     );

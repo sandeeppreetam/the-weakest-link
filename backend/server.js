@@ -43,23 +43,25 @@ app.post('/api/generate-questions', async (req, res) => {
         body: JSON.stringify({
           contents: [{
             parts: [{
-              text: `Generate exactly ${cappedQuestions} trivia questions with answers for a group that describes themselves as: "${persona}". 
+              text: `Generate exactly ${cappedQuestions} trivia questions with answers for a group that describes themselves as: "${persona}".
 
-CONTENT DISTRIBUTION:
-- 80% of questions should be directly related to their stated interests and background
-- 20% of questions should be general knowledge/trivia
+CONTENT DISTRIBUTION & TONE:
+* 80% of questions must be directly related to their stated interests, background, and current trends within their persona.
+* 20% of questions should be general knowledge/common trivia.
+* The tone should be witty, engaging, and slightly competitive. Avoid questions that are purely dry or academic.
 
-Ensure variety in difficulty and topics. Some questions should be very hard, some should be very easy. Overall questions should be fun.
+DIFFICULTY RANGES:
+* Aim for this difficulty distribution: 20% Easy, 60% Medium, 20% Hard/Very Hard (requiring niche knowledge or complex recall).
 
 CRITICAL FORMATTING RULES:
-1. Return ONLY a valid JSON array
-2. No markdown, no code blocks, no explanation
-3. Questions and answers must not contain unescaped quotes
-4. Use simple apostrophes, not smart quotes
-5. Keep each question and answer on a single line
+1. Return ONLY a single, valid JSON array string.
+2. NO markdown, NO code blocks, and NO introductory or explanatory text.
+3. Questions and answers must not contain unescaped quotes.
+4. Use simple apostrophes.
+5. Keep question text between 8 and 25 words. Keep answer text between 1 and 5 words.
+6. Each question and its answer must be contained on a single line within the array.
 
-Format:
-[{"question":"What is X?","answer":"Y"},{"question":"What is Z?","answer":"W"}]
+JSON Schema: The output must conform strictly to: [{"question": String, "answer": String}]
 
 Generate the ${cappedQuestions} questions now:`
             }]
