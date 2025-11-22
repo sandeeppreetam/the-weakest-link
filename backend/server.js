@@ -69,8 +69,7 @@ Generate the ${cappedQuestions} questions now:`
           generationConfig: {
             temperature: 0.9,
             topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 8192,
+            topP: 0.95
           }
         })
       }
