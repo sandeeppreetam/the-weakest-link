@@ -337,7 +337,7 @@ const App = () => {
         
         <div className="bg-white rounded-3xl border-2 border-black shadow-lg p-16 max-w-md w-full text-center animate-bounce-in">
           <h1 className="text-5xl font-black text-black mb-8 tracking-tight">
-            The Weakest Link
+            The Weakest L🔗nk
           </h1>
 
           <button
@@ -449,23 +449,29 @@ const App = () => {
         {showInstructions && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-8 z-50">
             <div className="bg-white rounded-3xl border-2 border-black shadow-2xl p-8 max-w-2xl w-full animate-bounce-in">
-              <h2 className="text-3xl font-bold text-black mb-4">How to play</h2>
+<h2 className="text-3xl font-bold text-black mb-4">How to play</h2>
 
-              <div className="space-y-3 text-sm text-black mb-6">
-                <p>1. Add 2 to 12 players, give them names.</p>
-                <p>2. Describe your group so question generation fits your interests. Or skip and use default questions.</p>
-                <p>3. Each round, every player answers a set number of questions.</p>
-                <p>4. At round end, everyone votes for who they think is the weakest link.</p>
-                <p>5. The voted player loses one life. Players with zero lives are out.</p>
-                <p>6. The game ends when one player remains. That player wins.</p>
-              </div>
+       <div className="space-y-3 text-sm text-black mb-6">
+         <p>
+          This is a trivia game where your knowledge is judged by your peers. In each round, you'll face questions of wildly different difficulties. After the trivia, you must vote out the player you believe is the weakest link, costing them a precious Life.
+         </p>
 
-              <div className="space-y-3 text-xs text-gray-600 mb-6">
-                <p className="font-semibold">Notes</p>
-                <p>• Timers are a guide. Voting will not move on until someone is selected.</p>
-                <p>• If question generation fails, the app uses a fallback bank.</p>
-                <p>• You can change questions per player, timer lengths, and starting lives in settings.</p>
-              </div>
+         <p className="font-semibold mt-4">The Goal</p>
+         <p>Be the last player standing with at least one Life remaining.</p>
+
+         <p className="font-semibold mt-4">Game Setup</p>
+         <p>All players start with a set number of Lives (e.g., 3). The game proceeds in alternating Trivia and Voting phases.</p>
+
+         <p className="font-semibold mt-4">1. The Trivia Phase</p>
+         <p>Questions proceed cyclically (P1, P2, P3, P1, etc.), with each player answering a fixed number of questions per round.</p>
+
+         <p className="font-semibold mt-4">2. The Voting Phase</p>
+         <p>Players first have a set time (e.g., 60 seconds) to openly discuss the round's performance. Following discussion, every player must secretly vote for the player they deem "The Weakest Link."</p>
+         <p>Life Loss: The player(s) receiving the most votes lose 1 Life. If a player hits zero Lives, they are eliminated immediately.</p>
+
+         <p className="font-semibold mt-4">Winning</p>
+         <p>The game ends when only one player remains.</p>
+       </div>
 
               <div className="flex gap-3">
                 <button
