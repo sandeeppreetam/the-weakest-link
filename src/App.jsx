@@ -295,32 +295,64 @@ const App = () => {
   // Landing Screen
   if (screen === 'landing') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center p-8">
-        <div className="bg-white rounded-2xl shadow-xl p-12 max-w-md w-full text-center">
-          <h1 className="text-4xl font-bold text-gray-800 mb-8">The Weakest Link</h1>
+      <div className="min-h-screen bg-white flex items-center justify-center p-8">
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+          
+          * {
+            font-family: 'Inter', sans-serif;
+          }
+          
+          @keyframes bounce-in {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+          }
+          
+          .animate-bounce-in {
+            animation: bounce-in 0.5s ease-out;
+          }
+          
+          .bounce-button {
+            transition: transform 0.2s ease;
+          }
+          
+          .bounce-button:hover {
+            transform: scale(1.05);
+          }
+          
+          .bounce-button:active {
+            transform: scale(0.98);
+          }
+        `}</style>
+        
+        <div className="bg-white rounded-3xl border-2 border-black shadow-lg p-16 max-w-md w-full text-center animate-bounce-in">
+          <h1 className="text-5xl font-black text-black mb-12 tracking-tight">
+            The Weakest Link
+          </h1>
           <button
             onClick={startGame}
-            className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold py-3 px-8 rounded-lg text-lg transition-colors"
+            className="bounce-button bg-black hover:bg-gray-800 text-white font-semibold py-3 px-8 rounded-full text-base mb-4 w-full"
           >
-            Start
+            Start Game
           </button>
           <button
             onClick={openSettings}
-            className="text-sm text-gray-500 mt-4 hover:text-gray-700 underline cursor-pointer block w-full"
+            className="text-sm text-gray-600 hover:text-black underline cursor-pointer block w-full transition-colors"
           >
-            customize settings
+            Settings
           </button>
         </div>
 
         {/* Settings Modal */}
         {showSettings && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-8 z-50">
-            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-              <h2 className="text-2xl font-bold text-gray-800 mb-6">Game Settings</h2>
+            <div className="bg-white rounded-3xl border-2 border-black shadow-2xl p-8 max-w-md w-full animate-bounce-in">
+              <h2 className="text-3xl font-bold text-black mb-6">Settings</h2>
               
               <div className="space-y-4 mb-6">
                 <div>
-                  <label className="block text-gray-700 mb-2 text-sm font-semibold">
+                  <label className="block text-black mb-2 text-sm font-semibold">
                     Questions per player per round
                   </label>
                   <input
@@ -328,12 +360,12 @@ const App = () => {
                     min="1"
                     value={settings.questionsPerPlayer}
                     onChange={(e) => handleSettingChange('questionsPerPlayer', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
+                    className="w-full px-4 py-2 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-gray-700 mb-2 text-sm font-semibold">
+                  <label className="block text-black mb-2 text-sm font-semibold">
                     Time per question (seconds)
                   </label>
                   <input
@@ -341,12 +373,12 @@ const App = () => {
                     min="1"
                     value={settings.questionTime}
                     onChange={(e) => handleSettingChange('questionTime', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
+                    className="w-full px-4 py-2 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-gray-700 mb-2 text-sm font-semibold">
+                  <label className="block text-black mb-2 text-sm font-semibold">
                     Time for voting (seconds)
                   </label>
                   <input
@@ -354,12 +386,12 @@ const App = () => {
                     min="1"
                     value={settings.votingTime}
                     onChange={(e) => handleSettingChange('votingTime', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
+                    className="w-full px-4 py-2 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-gray-700 mb-2 text-sm font-semibold">
+                  <label className="block text-black mb-2 text-sm font-semibold">
                     Starting lives per player
                   </label>
                   <input
@@ -367,7 +399,7 @@ const App = () => {
                     min="1"
                     value={settings.startingLives}
                     onChange={(e) => handleSettingChange('startingLives', e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
+                    className="w-full px-4 py-2 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                   />
                 </div>
               </div>
@@ -375,13 +407,13 @@ const App = () => {
               <div className="flex gap-3">
                 <button
                   onClick={saveSettings}
-                  className="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                  className="flex-1 bounce-button bg-black hover:bg-gray-800 text-white font-semibold py-3 px-6 rounded-lg"
                 >
                   Save
                 </button>
                 <button
                   onClick={closeSettings}
-                  className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 px-6 rounded-lg transition-colors"
+                  className="flex-1 bounce-button bg-white hover:bg-gray-100 text-black font-semibold py-3 px-6 rounded-lg border-2 border-black"
                 >
                   Cancel
                 </button>
@@ -396,22 +428,24 @@ const App = () => {
   // Setup Screen
   if (screen === 'setup') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center p-8">
-        <div className="bg-white rounded-2xl shadow-xl p-12 max-w-md w-full">
+      <div className="min-h-screen bg-white flex items-center justify-center p-8">
+        <div className="bg-white rounded-3xl border-2 border-black shadow-lg p-12 max-w-md w-full animate-bounce-in">
+          <h2 className="text-3xl font-bold text-black mb-8 text-center">Setup Game</h2>
+          
           <div className="mb-6">
-            <label className="block text-gray-700 mb-2">Number of players</label>
+            <label className="block text-black mb-2 font-semibold">Number of players</label>
             <input
               type="number"
               min="2"
               max="12"
               value={numPlayers}
               onChange={(e) => handleNumPlayersChange(parseInt(e.target.value) || 2)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
+              className="w-full px-4 py-3 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-lg"
             />
           </div>
           
           <div className="mb-6">
-            <label className="block text-gray-700 mb-2">Names</label>
+            <label className="block text-black mb-2 font-semibold">Player Names</label>
             <div className="space-y-3">
               {playerNames.map((name, index) => (
                 <input
@@ -420,7 +454,7 @@ const App = () => {
                   value={name}
                   onChange={(e) => handleNameChange(index, e.target.value)}
                   placeholder={`Player ${index + 1}`}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500"
+                  className="w-full px-4 py-3 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
                 />
               ))}
             </div>
@@ -428,7 +462,7 @@ const App = () => {
 
           <button
             onClick={proceedToPersona}
-            className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold py-3 px-8 rounded-lg text-lg transition-colors"
+            className="w-full bounce-button bg-black hover:bg-gray-800 text-white font-semibold py-3 px-8 rounded-full text-base"
           >
             Next
           </button>
@@ -440,31 +474,28 @@ const App = () => {
   // Persona Screen
   if (screen === 'persona') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center p-8">
-        <div className="bg-white rounded-2xl shadow-xl p-12 max-w-2xl w-full">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Customize Your Experience</h2>
+      <div className="min-h-screen bg-white flex items-center justify-center p-8">
+        <div className="bg-white rounded-3xl border-2 border-black shadow-lg p-12 max-w-2xl w-full animate-bounce-in">
+          <h2 className="text-3xl font-bold text-black mb-8 text-center">Describe Your Group</h2>
 
           <div className="mb-6">
-            <label className="block text-gray-700 mb-2 font-semibold">
-              Describe Your Group
-            </label>
             <textarea
               value={persona}
               onChange={(e) => setPersona(e.target.value)}
               placeholder="e.g., We are product managers who love sports, technology, and pop culture"
               rows="4"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-purple-500 resize-none"
+              className="w-full px-4 py-3 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black resize-none"
               disabled={isGeneratingQuestions}
             />
-            <p className="text-xs text-gray-500 mt-1">
-              This helps generate relevant questions for your group
+            <p className="text-xs text-gray-600 mt-2">
+              This helps generate relevant questions for your interests
             </p>
           </div>
 
           <button
             onClick={generateQuestionsWithGemini}
             disabled={isGeneratingQuestions}
-            className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold py-3 px-8 rounded-lg text-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full bounce-button bg-black hover:bg-gray-800 text-white font-semibold py-3 px-8 rounded-full text-base disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isGeneratingQuestions ? (
               <>
@@ -472,17 +503,17 @@ const App = () => {
                 Generating Questions...
               </>
             ) : (
-              "Let's go"
+              "Start Game"
             )}
           </button>
 
           {isGeneratingQuestions && (
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm text-blue-800 text-center mb-2 font-semibold">
-                🎯 Crafting your personalized trivia experience...
+            <div className="mt-6 p-4 bg-gray-50 border-2 border-black rounded-lg animate-bounce-in">
+              <p className="text-sm text-black text-center mb-1 font-semibold">
+                Crafting your personalized trivia experience
               </p>
-              <p className="text-xs text-blue-600 text-center">
-                We're generating questions tailored to your interests. This usually takes 10-30 seconds.
+              <p className="text-xs text-gray-600 text-center">
+                This usually takes 10-30 seconds
               </p>
             </div>
           )}
@@ -498,19 +529,25 @@ const App = () => {
     const currentQ = getCurrentQuestion();
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center p-8">
-        <div className="bg-white rounded-2xl shadow-xl p-12 max-w-2xl w-full">
+      <div className="min-h-screen bg-white flex items-center justify-center p-8">
+        <div className="bg-white rounded-3xl border-2 border-black shadow-lg p-12 max-w-2xl w-full animate-bounce-in">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">Round {currentRound}</h2>
-            <div className="text-xl font-bold text-gray-600">{formatTime(timer)} remaining</div>
+            <h2 className="text-2xl font-bold text-black">Round {currentRound}</h2>
+            <div className="text-xl font-bold text-black border-2 border-black px-4 py-2 rounded-full">
+              {formatTime(timer)}
+            </div>
           </div>
 
           <div className="mb-8">
-            <p className="text-sm text-gray-600 mb-2">Question {currentPlayerQuestionNumber} of {settings.questionsPerPlayer}</p>
-            <div className="bg-gray-50 rounded-lg p-6 mb-6">
-              <p className="text-xl text-gray-800">{currentQ.question}</p>
+            <p className="text-sm text-gray-600 mb-3 font-semibold">
+              Question {currentPlayerQuestionNumber} of {settings.questionsPerPlayer}
+            </p>
+            <div className="bg-gray-50 rounded-lg p-6 mb-6 border-2 border-black">
+              <p className="text-xl text-black leading-relaxed">{currentQ.question}</p>
               {showingAnswer && (
-                <p className="text-xl text-green-600 font-semibold mt-4">{currentQ.answer}</p>
+                <p className="text-xl text-black font-bold mt-4 pt-4 border-t-2 border-black animate-bounce-in">
+                  {currentQ.answer}
+                </p>
               )}
             </div>
           </div>
@@ -518,25 +555,28 @@ const App = () => {
           {!showingAnswer ? (
             <button
               onClick={handleAnswer}
-              className="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors"
+              className="w-full bounce-button bg-black hover:bg-gray-800 text-white font-semibold py-3 px-8 rounded-full text-base mb-4"
             >
-              Answer
+              Reveal Answer
             </button>
           ) : (
             <button
               onClick={handleNext}
-              className="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors"
+              className="w-full bounce-button bg-black hover:bg-gray-800 text-white font-semibold py-3 px-8 rounded-full text-base mb-4"
             >
-              Next
+              Next Question
             </button>
           )}
 
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <p className="text-sm font-semibold text-gray-700 mb-3">{currentPlayer.name}'s turn</p>
+          <div className="mt-8 pt-6 border-t-2 border-gray-200">
+            <p className="text-sm font-bold text-black mb-3">{currentPlayer.name}'s turn</p>
             <div className="space-y-1 text-sm text-gray-600">
               {playerOrder.map((player, idx) => (
-                <div key={player.id} className={idx === currentPlayerIndex ? 'font-bold' : ''}>
-                  {idx === currentPlayerIndex ? '→ ' : ''}{player.name}
+                <div 
+                  key={player.id} 
+                  className={`${idx === currentPlayerIndex ? 'font-bold text-black' : ''}`}
+                >
+                  {idx === currentPlayerIndex ? '→ ' : '  '}{player.name}
                 </div>
               ))}
             </div>
@@ -551,33 +591,39 @@ const App = () => {
     const activePlayers = players.filter(p => p.lives > 0);
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center p-8">
-        <div className="bg-white rounded-2xl shadow-xl p-12 max-w-2xl w-full">
+      <div className="min-h-screen bg-white flex items-center justify-center p-8">
+        <div className="bg-white rounded-3xl border-2 border-black shadow-lg p-12 max-w-2xl w-full animate-bounce-in">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">End of Round {currentRound}</h2>
-            <div className="text-xl font-bold text-gray-600">{formatTime(timer)} remaining for voting</div>
+            <h2 className="text-2xl font-bold text-black">End of Round {currentRound}</h2>
+            <div className="text-xl font-bold text-black border-2 border-black px-4 py-2 rounded-full">
+              {formatTime(timer)}
+            </div>
           </div>
 
-          <div className="space-y-4 mb-8">
+          <p className="text-center text-base text-black mb-6 font-semibold">
+            Vote for the weakest link
+          </p>
+
+          <div className="space-y-3 mb-8">
             {activePlayers.map(player => (
               <div
                 key={player.id}
                 onClick={() => !showConfirmation && handlePlayerSelect(player.id)}
                 className={`flex items-center justify-between p-4 rounded-lg border-2 cursor-pointer transition-all ${
                   selectedPlayer === player.id
-                    ? 'border-purple-500 bg-purple-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-black bg-gray-100'
+                    : 'border-gray-300 hover:border-black bg-white'
                 }`}
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                    selectedPlayer === player.id ? 'border-purple-500 bg-purple-500' : 'border-gray-300'
+                    selectedPlayer === player.id ? 'border-black bg-black' : 'border-gray-300'
                   }`}>
                     {selectedPlayer === player.id && (
                       <div className="w-3 h-3 bg-white rounded-full"></div>
                     )}
                   </div>
-                  <span className="font-semibold text-gray-800">{player.name}</span>
+                  <span className="font-semibold text-black">{player.name}</span>
                 </div>
                 <div className="flex gap-1">
                   {renderHearts(player.lives)}
@@ -587,20 +633,20 @@ const App = () => {
           </div>
 
           {showConfirmation && selectedPlayer !== null && (
-            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-gray-800 mb-4">
-                Vote player {players.find(p => p.id === selectedPlayer)?.name}?
+            <div className="mb-6 p-4 bg-gray-50 border-2 border-black rounded-lg animate-bounce-in">
+              <p className="text-black mb-4 text-center font-semibold">
+                Vote out {players.find(p => p.id === selectedPlayer)?.name}?
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={handleConfirmVote}
-                  className="flex-1 bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+                  className="flex-1 bounce-button bg-black hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded-lg"
                 >
                   Confirm
                 </button>
                 <button
                   onClick={handleCancelVote}
-                  className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition-colors"
+                  className="flex-1 bounce-button bg-white hover:bg-gray-100 text-black font-semibold py-2 px-4 rounded-lg border-2 border-black"
                 >
                   Cancel
                 </button>
@@ -621,24 +667,26 @@ const App = () => {
     const activePlayers = players.filter(p => p.lives > 0);
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center p-8">
-        <div className="bg-white rounded-2xl shadow-xl p-12 max-w-2xl w-full">
+      <div className="min-h-screen bg-white flex items-center justify-center p-8">
+        <div className="bg-white rounded-3xl border-2 border-black shadow-lg p-12 max-w-2xl w-full animate-bounce-in">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">End of Round {currentRound}</h2>
-            <div className="text-xl text-gray-600 mt-2">{formatTime(0)} remaining for voting</div>
+            <h2 className="text-3xl font-bold text-black text-center">Round {currentRound} Complete</h2>
           </div>
 
-          <div className="space-y-4 mb-8">
+          <div className="space-y-3 mb-8">
             {players.map(player => (
               <div
                 key={player.id}
                 className={`flex items-center justify-between p-4 rounded-lg border-2 ${
-                  player.lives === 0 ? 'border-gray-200 bg-gray-50 line-through text-gray-400' : 'border-gray-200'
+                  player.lives === 0 
+                    ? 'border-gray-200 bg-gray-50 opacity-50' 
+                    : 'border-gray-300 bg-white'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full border-2 border-gray-300"></div>
-                  <span className="font-semibold">{player.name}</span>
+                  <span className={`font-semibold ${player.lives === 0 ? 'line-through text-gray-400' : 'text-black'}`}>
+                    {player.name}
+                  </span>
                 </div>
                 <div className="flex gap-1">
                   {renderHearts(player.lives)}
@@ -649,9 +697,9 @@ const App = () => {
 
           <button
             onClick={handleNextRound}
-            className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold py-3 px-8 rounded-lg text-lg transition-colors"
+            className="w-full bounce-button bg-black hover:bg-gray-800 text-white font-semibold py-3 px-8 rounded-full text-base"
           >
-            {activePlayers.length > 1 ? 'Start next round?' : 'See winner'}
+            {activePlayers.length > 1 ? 'Start Next Round' : 'See Winner'}
           </button>
         </div>
       </div>
@@ -663,16 +711,19 @@ const App = () => {
     const winner = players.find(p => p.lives > 0) || players[0];
 
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 to-blue-100 flex items-center justify-center p-8">
-        <div className="bg-white rounded-2xl shadow-xl p-12 max-w-md w-full text-center">
-          <h1 className="text-4xl font-bold text-gray-800 mb-8">
-            {winner.name} is the winner!
+      <div className="min-h-screen bg-white flex items-center justify-center p-8">
+        <div className="bg-white rounded-3xl border-2 border-black shadow-lg p-16 max-w-md w-full text-center animate-bounce-in">
+          <h1 className="text-5xl font-black text-black mb-2">
+            {winner.name}
           </h1>
+          <p className="text-xl font-semibold text-gray-600 mb-12">
+            is the winner
+          </p>
           <button
             onClick={resetGame}
-            className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold py-3 px-8 rounded-lg text-lg transition-colors"
+            className="bounce-button bg-black hover:bg-gray-800 text-white font-semibold py-3 px-10 rounded-full text-base"
           >
-            Play again
+            Play Again
           </button>
         </div>
       </div>
