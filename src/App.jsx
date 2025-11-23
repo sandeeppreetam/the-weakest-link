@@ -27,8 +27,8 @@ const QUESTION_BANK = [
 
 const DEFAULTS = {
   questionsPerPlayer: 2,
-  questionTime: 10,
-  votingTime: 30,
+  questionTime: 45,
+  votingTime: 90,
   startingLives: 2
 };
 
@@ -71,6 +71,13 @@ const App = () => {
   const startGame = () => {
     setScreen('setup');
   };
+
+    // Auto-reveal answer when timer runs out on question screen
+  useEffect(() => {
+    if (screen === 'question' && timer === 0 && !showingAnswer) {
+      setShowingAnswer(true);
+    }
+  }, [screen, timer, showingAnswer]);
 
   const handleNumPlayersChange = (num) => {
     const count = Math.max(2, Math.min(12, num));
