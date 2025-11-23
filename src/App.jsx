@@ -59,6 +59,8 @@ const App = () => {
     startingLives: DEFAULTS.startingLives
   });
   const [audioInitialized, setAudioInitialized] = useState(false);
+  const [confettiTriggered, setConfettiTriggered] = useState(false);
+  const [confettiKey, setConfettiKey] = useState(0);
 
   // Initialize audio on first user interaction
   const initAudio = async () => {
@@ -318,11 +320,24 @@ const App = () => {
     
     const activePlayers = updatedPlayers.filter(p => p.lives > 0);
     if (activePlayers.length <= 1) {
+      // Trigger initial confetti and sound
+      setConfettiTriggered(true);
+      setConfettiKey(0);
       setTimeout(() => playSuccessSound(), 300);
       setScreen('winner');
     } else {
       setScreen('roundEnd');
     }
+  };
+
+  const triggerCelebration = () => {
+    setConfettiKey(prev => prev + 1);
+    setConfettiTriggered(true);
+    playSuccessSound();
+    // Reset confetti after animation completes so it can be triggered again
+    setTimeout(() => {
+      setConfettiTriggered(false);
+    }, 7000);
   };
 
   const handleCancelVote = () => {
@@ -359,6 +374,8 @@ const App = () => {
     setTimer(settings.questionTime);
     setSelectedPlayer(null);
     setShowConfirmation(false);
+    setConfettiTriggered(false);
+    setConfettiKey(0);
   };
 
   const openSettings = () => {
@@ -895,13 +912,85 @@ const App = () => {
     const winner = players.find(p => p.lives > 0) || players[0];
 
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center p-8">
-        <div className="bg-white rounded-3xl border-2 border-black shadow-lg p-16 max-w-md w-full text-center animate-bounce-in">
-          <h1 className="text-5xl font-black text-black mb-2">
-            {winner.name}
-          </h1>
+      <div className="min-h-screen bg-white flex items-center justify-center p-8 relative overflow-hidden">
+        <style>{`
+          @keyframes confetti-fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+          }
+          
+          @keyframes pulse-scale {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+          }
+          
+          @keyframes trophy-bounce {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.2) rotate(-10deg); }
+            75% { transform: scale(1.2) rotate(10deg); }
+          }
+          
+          .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confetti-fall linear forwards;
+            pointer-events: none;
+          }
+          
+          .winner-text {
+            animation: pulse-scale 2s ease-in-out infinite;
+          }
+          
+          .trophy {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            display: inline-block;
+            animation: ${confettiTriggered ? 'trophy-bounce 0.6s ease-in-out' : 'none'};
+          }
+          
+          .trophy:hover {
+            transform: scale(1.1);
+          }
+        `}</style>
+        
+        {/* Confetti - only show when triggered */}
+        {confettiTriggered && Array.from({ length: 100 }).map((_, i) => {
+          const colors = ['#FF6B6B', '#4ECDC4', '#FFE66D', '#95E1D3', '#F38181', '#AA96DA', '#FCBAD3'];
+          const randomColor = colors[Math.floor(Math.random() * colors.length)];
+          const randomLeft = Math.random() * 100;
+          const randomDelay = Math.random() * 0.5;
+          const randomDuration = 3 + Math.random() * 2;
+          
+          return (
+            <div
+              key={`${confettiKey}-${i}`}
+              className="confetti"
+              style={{
+                left: `${randomLeft}%`,
+                top: '-10px',
+                backgroundColor: randomColor,
+                animationDelay: `${randomDelay}s`,
+                animationDuration: `${randomDuration}s`
+              }}
+            />
+          );
+        })}
+        
+        <div className="bg-white rounded-3xl border-2 border-black shadow-lg p-16 max-w-md w-full text-center animate-bounce-in relative z-10">
+          <div className="mb-4">
+            <div 
+              className="text-6xl mb-4 trophy"
+              onClick={triggerCelebration}
+            >
+              🏆
+            </div>
+            <h1 className="text-5xl font-black text-black mb-2 winner-text">
+              {winner.name}
+            </h1>
+          </div>
           <p className="text-xl font-semibold text-gray-600 mb-12">
-            is the winner
+            is the winner!
           </p>
           <button
             onClick={resetGame}
