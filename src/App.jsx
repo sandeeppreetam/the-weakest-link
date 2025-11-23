@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, Loader2 } from 'lucide-react';
+import * as Tone from 'tone';
 
 // Sample questions - fallback if API fails
 const QUESTION_BANK = [
@@ -27,7 +28,7 @@ const QUESTION_BANK = [
 
 const DEFAULTS = {
   questionsPerPlayer: 2,
-  questionTime: 45,
+  questionTime: 30,
   votingTime: 90,
   startingLives: 2
 };
@@ -57,27 +58,113 @@ const App = () => {
     votingTime: DEFAULTS.votingTime,
     startingLives: DEFAULTS.startingLives
   });
+  const [audioInitialized, setAudioInitialized] = useState(false);
 
-  // Timer countdown
+  // Initialize audio on first user interaction
+  const initAudio = async () => {
+    if (!audioInitialized) {
+      await Tone.start();
+      setAudioInitialized(true);
+    }
+  };
+
+  // Sound effect functions
+  const playTickSound = () => {
+    if (!audioInitialized) return;
+    const synth = new Tone.Synth({
+      oscillator: { type: 'sine' },
+      envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 }
+    }).toDestination();
+    synth.triggerAttackRelease('C5', '0.05');
+  };
+
+  const playWarningSound = () => {
+    if (!audioInitialized) return;
+    const synth = new Tone.Synth({
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.2 }
+    }).toDestination();
+    synth.triggerAttackRelease('G4', '0.1');
+  };
+
+  const playRevealSound = () => {
+    if (!audioInitialized) return;
+    const synth = new Tone.Synth({
+      oscillator: { type: 'sine' },
+      envelope: { attack: 0.01, decay: 0.3, sustain: 0.2, release: 0.5 }
+    }).toDestination();
+    synth.triggerAttackRelease('C5', '0.3');
+    setTimeout(() => synth.triggerAttackRelease('E5', '0.3'), 100);
+  };
+
+  const playVoteSound = () => {
+    if (!audioInitialized) return;
+    const synth = new Tone.Synth({
+      oscillator: { type: 'triangle' },
+      envelope: { attack: 0.02, decay: 0.3, sustain: 0, release: 0.3 }
+    }).toDestination();
+    synth.triggerAttackRelease('A4', '0.2');
+  };
+
+  const playSuccessSound = () => {
+    if (!audioInitialized) return;
+    const synth = new Tone.Synth({
+      oscillator: { type: 'sine' },
+      envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.4 }
+    }).toDestination();
+    synth.triggerAttackRelease('C5', '0.15');
+    setTimeout(() => synth.triggerAttackRelease('E5', '0.15'), 100);
+    setTimeout(() => synth.triggerAttackRelease('G5', '0.3'), 200);
+  };
+
+  const playButtonClick = () => {
+    if (!audioInitialized) return;
+    const synth = new Tone.Synth({
+      oscillator: { type: 'sine' },
+      envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 }
+    }).toDestination();
+    synth.triggerAttackRelease('C6', '0.05');
+  };
+
+  // Timer countdown with sound effects
   useEffect(() => {
     if (screen === 'question' || screen === 'voting') {
       const interval = setInterval(() => {
-        setTimer(prev => Math.max(0, prev - 1));
+        setTimer(prev => {
+          const newTime = Math.max(0, prev - 1);
+          
+          // Play tick sound for last 5 seconds
+          if (newTime <= 5 && newTime > 0) {
+            playTickSound();
+          }
+          
+          // Play warning sound at 10 seconds
+          if (newTime === 10) {
+            playWarningSound();
+          }
+          
+          return newTime;
+        });
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [screen]);
+  }, [screen, audioInitialized]);
 
-  const startGame = () => {
-    setScreen('setup');
-  };
-
-    // Auto-reveal answer when timer runs out on question screen
+  // Auto-reveal answer when timer runs out on question screen
   useEffect(() => {
     if (screen === 'question' && timer === 0 && !showingAnswer) {
       setShowingAnswer(true);
+      playRevealSound();
     }
   }, [screen, timer, showingAnswer]);
+
+  const startGame = async () => {
+    await initAudio();
+    setTimeout(() => {
+      playButtonClick();
+      setScreen('setup');
+    }, 50);
+  };
 
   const handleNumPlayersChange = (num) => {
     const count = Math.max(2, Math.min(12, num));
@@ -96,6 +183,7 @@ const App = () => {
       alert('Please enter all player names');
       return;
     }
+    playButtonClick();
     setScreen('persona');
   };
 
@@ -187,9 +275,11 @@ const App = () => {
 
   const handleAnswer = () => {
     setShowingAnswer(true);
+    playRevealSound();
   };
 
   const handleNext = () => {
+    playButtonClick();
     const totalQuestionsThisRound = playerOrder.length * settings.questionsPerPlayer;
     const nextQuestionIndex = currentQuestionIndex + 1;
     
@@ -213,6 +303,7 @@ const App = () => {
   const handlePlayerSelect = (playerId) => {
     setSelectedPlayer(playerId);
     setShowConfirmation(true);
+    playVoteSound();
   };
 
   const handleConfirmVote = () => {
@@ -223,9 +314,11 @@ const App = () => {
     );
     setPlayers(updatedPlayers);
     setShowConfirmation(false);
+    playVoteSound();
     
     const activePlayers = updatedPlayers.filter(p => p.lives > 0);
     if (activePlayers.length <= 1) {
+      setTimeout(() => playSuccessSound(), 300);
       setScreen('winner');
     } else {
       setScreen('roundEnd');
@@ -233,11 +326,13 @@ const App = () => {
   };
 
   const handleCancelVote = () => {
+    playButtonClick();
     setSelectedPlayer(null);
     setShowConfirmation(false);
   };
 
   const handleNextRound = () => {
+    playButtonClick();
     const activePlayers = players.filter(p => p.lives > 0);
     if (activePlayers.length <= 1) {
       setScreen('winner');
@@ -248,6 +343,7 @@ const App = () => {
   };
 
   const resetGame = () => {
+    playButtonClick();
     setScreen('landing');
     setNumPlayers(2);
     setPlayerNames(['', '']);
@@ -266,18 +362,22 @@ const App = () => {
   };
 
   const openSettings = () => {
+    playButtonClick();
     setShowSettings(true);
   };
 
   const closeSettings = () => {
+    playButtonClick();
     setShowSettings(false);
   };
 
   const openInstructions = () => {
+    playButtonClick();
     setShowInstructions(true);
   };
 
   const closeInstructions = () => {
+    playButtonClick();
     setShowInstructions(false);
   };
 
@@ -289,6 +389,7 @@ const App = () => {
   };
 
   const saveSettings = () => {
+    playButtonClick();
     setShowSettings(false);
   };
 
@@ -456,29 +557,29 @@ const App = () => {
         {showInstructions && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-8 z-50">
             <div className="bg-white rounded-3xl border-2 border-black shadow-2xl p-8 max-w-2xl w-full animate-bounce-in">
-<h2 className="text-3xl font-bold text-black mb-4">How to play</h2>
+              <h2 className="text-3xl font-bold text-black mb-4">How to play</h2>
 
-       <div className="space-y-3 text-sm text-black mb-6">
-         <p>
-          This is a trivia game where your knowledge is judged by your peers. In each round, you'll face questions of wildly different difficulties. After the trivia, you must vote out the player you believe is the weakest link, costing them a precious Life.
-         </p>
+              <div className="space-y-3 text-sm text-black mb-6">
+                <p>
+                  This is a trivia game where your knowledge is judged by your peers. In each round, you'll face questions of wildly different difficulties. After the trivia, you must vote out the player you believe is the weakest link, costing them a precious Life.
+                </p>
 
-         <p className="font-semibold mt-4">The Goal</p>
-         <p>Be the last player standing with at least one Life remaining.</p>
+                <p className="font-semibold mt-4">The Goal</p>
+                <p>Be the last player standing with at least one Life remaining.</p>
 
-         <p className="font-semibold mt-4">Game Setup</p>
-         <p>All players start with a set number of Lives (e.g., 3). The game proceeds in alternating Trivia and Voting phases.</p>
+                <p className="font-semibold mt-4">Game Setup</p>
+                <p>All players start with a set number of Lives (e.g., 3). The game proceeds in alternating Trivia and Voting phases.</p>
 
-         <p className="font-semibold mt-4">1. The Trivia Phase</p>
-         <p>Questions proceed cyclically (P1, P2, P3, P1, etc.), with each player answering a fixed number of questions per round.</p>
+                <p className="font-semibold mt-4">1. The Trivia Phase</p>
+                <p>Questions proceed cyclically (P1, P2, P3, P1, etc.), with each player answering a fixed number of questions per round.</p>
 
-         <p className="font-semibold mt-4">2. The Voting Phase</p>
-         <p>Players first have a set time (e.g., 60 seconds) to openly discuss the round's performance. Following discussion, every player must secretly vote for the player they deem "The Weakest Link."</p>
-         <p>Life Loss: The player(s) receiving the most votes lose 1 Life. If a player hits zero Lives, they are eliminated immediately.</p>
+                <p className="font-semibold mt-4">2. The Voting Phase</p>
+                <p>Players first have a set time (e.g., 60 seconds) to openly discuss the round's performance. Following discussion, every player must secretly vote for the player they deem "The Weakest Link."</p>
+                <p>Life Loss: The player(s) receiving the most votes lose 1 Life. If a player hits zero Lives, they are eliminated immediately.</p>
 
-         <p className="font-semibold mt-4">Winning</p>
-         <p>The game ends when only one player remains.</p>
-       </div>
+                <p className="font-semibold mt-4">Winning</p>
+                <p>The game ends when only one player remains.</p>
+              </div>
 
               <div className="flex gap-3">
                 <button
@@ -508,23 +609,23 @@ const App = () => {
         <div className="bg-white rounded-3xl border-2 border-black shadow-lg p-12 max-w-md w-full animate-bounce-in">
           <h2 className="text-3xl font-bold text-black mb-8 text-center">Setup Game</h2>
           
-    <div className="mb-6">
-      <label className="block text-black mb-2 font-semibold">
-        Number of players
-      </label>
+          <div className="mb-6">
+            <label className="block text-black mb-2 font-semibold">
+              Number of players
+            </label>
 
-      <select
-        value={numPlayers}
-        onChange={(e) => handleNumPlayersChange(parseInt(e.target.value))}
-        className="w-full px-4 py-3 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-lg bg-white"
-      >
-        {Array.from({ length: 8 }, (_, i) => i + 2).map((n) => (
-          <option key={n} value={n}>
-            {n}
-          </option>
-        ))}
-      </select>
-    </div>
+            <select
+              value={numPlayers}
+              onChange={(e) => handleNumPlayersChange(parseInt(e.target.value))}
+              className="w-full px-4 py-3 border-2 border-black rounded-lg focus:outline-none focus:ring-2 focus:ring-black text-lg bg-white"
+            >
+              {Array.from({ length: 8 }, (_, i) => i + 2).map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+          </div>
 
           
           <div className="mb-6">
