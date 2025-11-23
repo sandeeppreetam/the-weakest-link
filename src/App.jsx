@@ -1,30 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, Loader2 } from 'lucide-react';
 import * as Tone from 'tone';
-
-// Sample questions - fallback if API fails
-const QUESTION_BANK = [
-  { question: "What is the capital of India?", answer: "New Delhi" },
-  { question: "What is the largest planet in our solar system?", answer: "Jupiter" },
-  { question: "Who painted the Mona Lisa?", answer: "Leonardo da Vinci" },
-  { question: "What is the chemical symbol for gold?", answer: "Au" },
-  { question: "What year did World War II end?", answer: "1945" },
-  { question: "What is the smallest country in the world?", answer: "Vatican City" },
-  { question: "Who wrote Romeo and Juliet?", answer: "William Shakespeare" },
-  { question: "What is the speed of light?", answer: "299,792,458 m/s" },
-  { question: "What is the capital of France?", answer: "Paris" },
-  { question: "How many continents are there?", answer: "7" },
-  { question: "What is the longest river in the world?", answer: "The Nile" },
-  { question: "Who invented the telephone?", answer: "Alexander Graham Bell" },
-  { question: "What is the hardest natural substance?", answer: "Diamond" },
-  { question: "What is the currency of Japan?", answer: "Yen" },
-  { question: "Who was the first person on the moon?", answer: "Neil Armstrong" },
-  { question: "What is the largest ocean?", answer: "Pacific Ocean" },
-  { question: "What is the boiling point of water?", answer: "100°C" },
-  { question: "Who wrote Harry Potter?", answer: "J.K. Rowling" },
-  { question: "What is the capital of Australia?", answer: "Canberra" },
-  { question: "How many bones are in the human body?", answer: "206" }
-];
+import { QUESTION_BANK } from './questionBank';
 
 const DEFAULTS = {
   questionsPerPlayer: 2,
@@ -232,11 +209,12 @@ const App = () => {
     } catch (error) {
       console.error('Error generating questions:', error);
       alert('Failed to generate questions. Using default question bank instead.');
-      // Fallback to default questions
+      // Fallback to default questions - shuffled for randomness
+      const shuffledBank = [...QUESTION_BANK].sort(() => Math.random() - 0.5);
       const fallbackQuestions = [];
       const totalQuestions = Math.pow(numPlayers, 2) * settings.startingLives * settings.questionsPerPlayer * 2;
       for (let i = 0; i < totalQuestions; i++) {
-        fallbackQuestions.push(QUESTION_BANK[i % QUESTION_BANK.length]);
+        fallbackQuestions.push(shuffledBank[i % shuffledBank.length]);
       }
       startGameplay(fallbackQuestions);
     } finally {
