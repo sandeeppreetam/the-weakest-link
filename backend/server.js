@@ -11,8 +11,16 @@ app.use(express.json());
 
 // API endpoint to generate questions
 app.post('/api/generate-questions', async (req, res) => {
+  const startTime = Date.now(); // Start total request timer
+  
   try {
     const { persona, totalQuestions } = req.body;
+    
+    // --- Logging Input ---
+    console.log(`[Request] Received request to generate questions.`);
+    console.log(`[Input] Persona: "${persona}"`);
+    console.log(`[Input] Requested Total Questions: ${totalQuestions}`);
+    // ---------------------
 
     if (!persona || !totalQuestions) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -23,7 +31,7 @@ app.post('/api/generate-questions', async (req, res) => {
     const cappedQuestions = Math.min(totalQuestions, MAX_QUESTIONS);
 
     if (totalQuestions > MAX_QUESTIONS) {
-      console.log(`Requested ${totalQuestions} questions, capping at ${MAX_QUESTIONS}`);
+      console.log(`[Info] Requested ${totalQuestions} questions, capping at ${MAX_QUESTIONS}`);
     }
 
     // Get API key from environment variable
@@ -32,6 +40,9 @@ app.post('/api/generate-questions', async (req, res) => {
     if (!apiKey) {
       return res.status(500).json({ error: 'API key not configured' });
     }
+    
+    const apiStartTime = Date.now(); // Start API call timer
+    console.log(`[API Call] Calling Gemini API for ${cappedQuestions} questions...`);
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -74,7 +85,11 @@ Generate the ${cappedQuestions} questions now:`
         })
       }
     );
-
+    
+    const apiEndTime = Date.now(); // End API call timer
+    const apiDuration = apiEndTime - apiStartTime;
+    console.log(`[API Call] Gemini API finished in ${apiDuration}ms`);
+    
     if (!response.ok) {
       throw new Error('Failed to generate questions from Gemini API');
     }
@@ -89,7 +104,7 @@ Generate the ${cappedQuestions} questions now:`
       const cleanedText = generatedText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
       questionsArray = JSON.parse(cleanedText);
     } catch (parseError) {
-      console.error('Failed to parse questions:', parseError);
+      console.error('[Error] Failed to parse questions:', parseError);
       throw new Error('Failed to parse generated questions');
     }
 
@@ -101,10 +116,15 @@ Generate the ${cappedQuestions} questions now:`
     while (questionsArray.length < cappedQuestions) {
       questionsArray.push(...questionsArray.slice(0, cappedQuestions - questionsArray.length));
     }
+    
+    const endTime = Date.now(); // End total request timer
+    const totalDuration = endTime - startTime;
+    
+    console.log(`[Success] Successfully generated and returned ${questionsArray.length} questions. Total request time: ${totalDuration}ms`);
 
     res.json({ questions: questionsArray });
   } catch (error) {
-    console.error('Error generating questions:', error);
+    console.error('[Error] Error generating questions:', error.message || error);
     res.status(500).json({ error: error.message || 'Failed to generate questions' });
   }
 });
