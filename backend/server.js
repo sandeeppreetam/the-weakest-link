@@ -12,10 +12,13 @@ app.use(express.json());
 // API endpoint to generate questions
 app.post('/api/generate-questions', async (req, res) => {
   const startTime = Date.now(); // Start total request timer
+  let persona = 'N/A (Missing in Request)'; // Initialize for reliable access in catch
+  let totalQuestions = 0; // Initialize for reliable access in catch
   
   try {
-    const { persona, totalQuestions } = req.body;
-    
+    persona = req.body.persona;
+    totalQuestions = req.body.totalQuestions;
+
     // --- Logging Input ---
     console.log(`[Request] Received request to generate questions.`);
     console.log(`[Input] Persona: "${persona}"`);
@@ -23,7 +26,13 @@ app.post('/api/generate-questions', async (req, res) => {
     // ---------------------
 
     if (!persona || !totalQuestions) {
-      return res.status(400).json({ error: 'Missing required fields' });
+      // Throw specific errors to be logged in the catch block and returned as 400
+      if (!persona) {
+        throw new Error('Missing required field: persona');
+      }
+      if (!totalQuestions) {
+        throw new Error('Missing required field: totalQuestions');
+      }
     }
 
     // Enforce maximum questions limit
@@ -38,7 +47,7 @@ app.post('/api/generate-questions', async (req, res) => {
     const apiKey = process.env.GEMINI_API_KEY;
     
     if (!apiKey) {
-      return res.status(500).json({ error: 'API key not configured' });
+      throw new Error('API key not configured');
     }
     
     const apiStartTime = Date.now(); // Start API call timer
@@ -120,12 +129,27 @@ Generate the ${cappedQuestions} questions now:`
     const endTime = Date.now(); // End total request timer
     const totalDuration = endTime - startTime;
     
-    console.log(`[Success] Successfully generated and returned ${questionsArray.length} questions. Total request time: ${totalDuration}ms`);
+    // --- Success Log ---
+    console.log(`[Success] Generated ${questionsArray.length} questions for Persona: "${persona}". Total request time: ${totalDuration}ms`);
+    // ---------------------------
 
     res.json({ questions: questionsArray });
   } catch (error) {
-    console.error('[Error] Error generating questions:', error.message || error);
-    res.status(500).json({ error: error.message || 'Failed to generate questions' });
+    const endTime = Date.now(); // End total request timer
+    const totalDuration = endTime - startTime; // Calculate duration
+    const failureMessage = error.message || 'Unknown error occurred';
+
+    // --- Failure Log ---
+    console.error(`[Failure] Failed to generate questions for Persona: "${persona}". Reason: ${failureMessage}. Total request time: ${totalDuration}ms`);
+    // -------------------
+    
+    // Check for early-exit condition that should return 400
+    if (failureMessage.startsWith('Missing required field')) {
+      return res.status(400).json({ error: failureMessage });
+    }
+
+    // Default error response
+    res.status(500).json({ error: failureMessage || 'Failed to generate questions' });
   }
 });
 
