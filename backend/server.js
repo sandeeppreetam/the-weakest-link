@@ -19,7 +19,7 @@ app.post('/api/generate-questions', async (req, res) => {
     }
 
     // Enforce maximum questions limit
-    const MAX_QUESTIONS = 100;
+    const MAX_QUESTIONS = 250;
     const cappedQuestions = Math.min(totalQuestions, MAX_QUESTIONS);
 
     if (totalQuestions > MAX_QUESTIONS) {

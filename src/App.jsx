@@ -175,11 +175,22 @@ const App = () => {
     setIsGeneratingQuestions(true);
 
     try {
-      // Calculate total questions needed (capped at 500)
-      const totalQuestions = Math.min(
-        Math.pow(numPlayers, 2) * settings.startingLives * settings.questionsPerPlayer * 2,
-        500
+      // Variable aliases to match the formula structure
+      const P = numPlayers;
+      const L = settings.startingLives;
+      const Q = settings.questionsPerPlayer;
+
+      const theoreticalMaxQuestions = (
+          // Rounds with P players active: (P * (L - 1) + 1)
+          (P * (L - 1) + 1) * // Questions per P-player round: (P * Q)
+          (P * Q) 
+          // PLUS
+          +
+          // Questions in the final (P-1) player round: (P - 1) * Q
+          (P - 1) * Q
       );
+
+      const totalQuestions = Math.min(theoreticalMaxQuestions,250);
       
       const response = await fetch('/api/generate-questions', {
         method: 'POST',
